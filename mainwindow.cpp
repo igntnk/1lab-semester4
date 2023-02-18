@@ -27,6 +27,18 @@ MainWindow::MainWindow(QWidget *parent)
         parName[c]->setGeometry(10,35+25*c,20,20);
     }
 
+    for(int c=0;c<11;c++)
+    {
+        degreesX.push_back(new QLabel(this));
+        degreesX[c]->setFont(QFont("Arial",7));
+        degreesX[c]->setText(QString::number((c*10-50)/scale));
+        degreesY.push_back(new QLabel(this));
+        degreesY[c]->setFont(QFont("Arial",7));
+        degreesY[c]->setText(QString::number((-c*10+50)/scale));
+        degreesX[c]->setGeometry(shiftX_static-150+(25*c)+15,shiftY-10,50,50);
+        degreesY[c]->setGeometry(shiftX+10,shiftY_static-150+(c*25)+10,50,50);
+    }
+
     markerX = new QLabel(this);//Letter X and Y near of cordinate lines
     markerY = new QLabel(this);
     markerX->setText("X");
@@ -94,7 +106,6 @@ void MainWindow::doPainting(QPainter *drawer)
     pen.setWidth(3);
     pen.setStyle(Qt::SolidLine);
     drawer->setPen(pen);
-
     QPainterPath path;//Graphic path
     int checker = 0;
     for(int x=-shiftX+250;x<-shiftX+550;x++)//Path's lines
@@ -167,6 +178,8 @@ void MainWindow::mousePressEvent(QMouseEvent *eventPress)
 
 void MainWindow::mouseMoveEvent(QMouseEvent *eventMove)
 {
+    int checkScrollSideX =shiftX;
+    int checkScrollSideY =shiftY;
     if(eventMove->pos().x() >= shiftX_static-150 and eventMove->pos().x() < shiftX_static+150 and
             eventMove->pos().y() > shiftY_static-150 and eventMove->pos().y() < shiftY_static+150 and pressOnRect)
    {
@@ -174,7 +187,6 @@ void MainWindow::mouseMoveEvent(QMouseEvent *eventMove)
         shiftY=eventMove->pos().y()+controllY;
         markerX->setGeometry(shiftX_static+130,shiftY-18,20,20);
         markerY->setGeometry(shiftX+10,shiftY_static-150,20,20);
-        qDebug() << shiftX;
         this->update();
     }
 
@@ -196,6 +208,38 @@ void MainWindow::mouseMoveEvent(QMouseEvent *eventMove)
     else
     {
         markerY->setVisible(false);
+    }
+
+    for(int c=0;c<11;c++)
+    {
+        degreesX[c]->setGeometry(shiftX-135+(25*c)+25*scrollShifterX,shiftY-10,50,50);
+        degreesY[c]->setGeometry(shiftX+10,shiftY-140+(c*25)+25*scrollShifterY,50,50);
+
+        if(degreesX[c]->geometry().x()<250 and shiftX<checkScrollSideX)
+        {
+            ++scrollShifterX;
+        }
+        else if(degreesX[c]->geometry().x()>540 and shiftX>checkScrollSideX)
+        {
+            --scrollShifterX;
+        }
+        degreesX[c]->setText(QString::number((c*10-50)/scale+10/scale*scrollShifterX));
+
+        if(degreesY[c]->geometry().y()>310 and shiftY>checkScrollSideY)
+        {
+            --scrollShifterY;
+        }
+        else if(degreesY[c]->geometry().y()<38 and shiftY<checkScrollSideY)
+        {
+            ++scrollShifterY;
+        }
+        degreesY[c]->setText(QString::number((-c*10+50)/scale-10/scale*scrollShifterY));
+
+        if(shiftY<38 or shiftY>310){degreesX[c]->setVisible(false);}
+        else{degreesX[c]->setVisible(true);}
+
+        if(shiftX<250 or shiftX>530){degreesY[c]->setVisible(false);}
+        else{degreesY[c]->setVisible(true);}
     }
 }
 
