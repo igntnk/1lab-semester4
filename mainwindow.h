@@ -5,9 +5,12 @@
 #include <QPaintEvent>
 #include <QPainter>
 #include <QPainterPath>
+#include <QGraphicsDropShadowEffect>
 #include <cmath>
+#include "functiongraph.h"
 
 #ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
 class MainWindow : public QMainWindow
 {
@@ -16,35 +19,14 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
 
-    void paintEvent(QPaintEvent *event);
-    void doPainting(QPainter* drawer);
-
 private:
-    int scrollShifterX=0;
-    int scrollShifterY=0;
-    int shiftX= 400;// Graphic shift
-    int shiftY = 188;
-    float scale = 1;//Graphic scale
-
-    const int shiftX_static = 400;//Static graphic shift for rectangles
-    const int shiftY_static = 188;
-
-    int controllX;//Varialables for mose drag
-    int controllY;
-
-    bool pressOnRect = false;//Checker for rectangle hit
+    FunctionGraph* functionPanel;
+    QPoint graphPos;
 
     QLabel* functionText;//Visible tex of function
 
-    QLabel* markerX;//Letters of coordinates
-    QLabel* markerY;
-
     std::vector<QLineEdit*> changePar;//Places to change parameters
     std::vector<QLabel*> parName;//Parameters' names
-    std::vector<QLabel*> degreesX;//Numerical divisions
-    std::vector<QLabel*> degreesY;
-    std::vector<int> counterX;
-    std::vector<int> counterY;
 
     void textChanged1(const QString &text);
     void textChanged2(const QString &text);

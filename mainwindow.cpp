@@ -1,20 +1,32 @@
 #include "mainwindow.h"
-#include "./ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    this->setMinimumSize(600,400);
+    this->setMinimumSize(800,600);
     this->setWindowTitle("FunctionGraphic");
+
+    graphPos = QPoint(250,40);
+    functionPanel = new FunctionGraph(this);
+    functionPanel->setGeometry(QRect(graphPos,QSize(402,402)));
+    QGraphicsDropShadowEffect* rectangleShadow = new QGraphicsDropShadowEffect();
+    rectangleShadow->setColor(QColor(0,0,0,40));
+    rectangleShadow->setOffset(QPointF(10,10));
+    rectangleShadow->setBlurRadius(90);
+    functionPanel->setGraphicsEffect(rectangleShadow);
 
     functionText = new QLabel(this);//Function text setting
     functionText->setGeometry(10,10,150,20);
-    functionText->setText("y=ax +bx+cx+d");
+    functionText->setText("y=ax +bx +cx+d");
     functionText->setFont(QFont("Arial", 13));
+    QLabel* threeText = new QLabel(this);
+    threeText->setText("3");
     QLabel* twoText = new QLabel(this);
     twoText->setText("2");
+    threeText->setFont(QFont("Arial",9));
+    threeText->setGeometry(45,5,15,15);
     twoText->setFont(QFont("Arial",9));
-    twoText->setGeometry(46,5,15,15);
+    twoText->setGeometry(76,5,15,15);
 
     for(int c=0;c<4;c++)//QLineEdit setting
     {
@@ -27,223 +39,64 @@ MainWindow::MainWindow(QWidget *parent)
         parName[c]->setGeometry(10,35+25*c,20,20);
     }
 
-    for(int c=0;c<11;c++)
-    {
-        degreesX.push_back(new QLabel(this));
-        degreesX[c]->setFont(QFont("Arial",7));
-        degreesX[c]->setText(QString::number((c*10-50)/scale));
-        degreesY.push_back(new QLabel(this));
-        degreesY[c]->setFont(QFont("Arial",7));
-        degreesY[c]->setText(QString::number((-c*10+50)/scale));
-        degreesX[c]->setGeometry(shiftX_static-150+(25*c)+15,shiftY-10,50,50);
-        degreesY[c]->setGeometry(shiftX+10,shiftY_static-150+(c*25)+10,50,50);
-    }
-
-    markerX = new QLabel(this);//Letter X and Y near of cordinate lines
-    markerY = new QLabel(this);
-    markerX->setText("X");
-    markerY->setText("Y");
-    markerX->setFont(QFont("Arial", 12));
-    markerY->setFont(QFont("Arial", 12));
-    markerX->setGeometry(shiftX_static+130,shiftY-18,20,20);
-    markerY->setGeometry(shiftX+10,shiftY_static-150,20,20);
-
     connect(changePar[0],&QLineEdit::textChanged,this,&MainWindow::textChanged1);
     connect(changePar[1],&QLineEdit::textChanged,this,&MainWindow::textChanged2);
     connect(changePar[2],&QLineEdit::textChanged,this,&MainWindow::textChanged3);
     connect(changePar[3],&QLineEdit::textChanged,this,&MainWindow::textChanged4);
 }
 
-void MainWindow::paintEvent(QPaintEvent *event)
-{
-    Q_UNUSED(event);
-
-    QPainter drawer(this);
-    doPainting(&drawer);
-}
-
-void MainWindow::doPainting(QPainter *drawer)
-{
-    drawer->setRenderHint(QPainter::Antialiasing);
-
-    QPainterPath borderBack;
-    QPainterPath borderMain;
-    QPen pen;
-    QRadialGradient shadow(QPointF(shiftX_static,shiftY_static),200);
-    shadow.setColorAt(0, QColor(0,0,0,100));
-    shadow.setColorAt(1, QColor(0,0,0,0));
-
-    borderBack.addRoundedRect(QRectF(QPointF(shiftX_static-150,shiftY_static-150),QSizeF(350,350)),25,25);//Rectangle shadow
-    pen.setColor(QColor(0,0,0,0));
-    pen.setWidth(0);
-    drawer->setPen(pen);
-    drawer->fillPath(borderBack,QBrush(shadow));
-    drawer->drawPath(borderBack);
-
-    borderBack.clear();
-
-    pen.setColor(QColor(191, 177, 142));//Rectangle background
-    pen.setWidth(0);
-    drawer->setPen(pen);
-    borderBack.addRoundedRect(QRectF(QPointF(shiftX_static-150,shiftY_static-150),QSizeF(300,300)),25,25);
-    drawer->fillPath(borderBack,QColor(242, 234, 216));
-    drawer->drawPath(borderBack);
-
-    pen.setColor(QColor(130,2,2));//Coordinate lines
-    pen.setWidth(2);
-    pen.setStyle(Qt::DashLine);
-    drawer->setPen(pen);
-    if(shiftY>=38 and shiftY <= 338)
-    {
-        drawer->drawLine(shiftX_static-150,shiftY,shiftX_static+150,shiftY);
-    }
-    if(shiftX>=250 and shiftX<=550)
-    {
-        drawer->drawLine(shiftX,shiftY_static-150,shiftX,shiftY_static+150);
-    }
-
-    pen.setColor(QColor(150,2,2));
-    pen.setWidth(3);
-    pen.setStyle(Qt::SolidLine);
-    drawer->setPen(pen);
-    QPainterPath path;//Graphic path
-    int checker = 0;
-    for(int x=-shiftX+250;x<-shiftX+550;x++)//Path's lines
-    {
-        double functionResult = changePar[0]->text().toDouble()*pow(x,2)+
-                changePar[1]->text().toDouble()*(x)+
-                changePar[2]->text().toDouble()*(x)+
-                changePar[3]->text().toDouble();
-
-        for(float y=shiftY-338;y<shiftY-38;y++)
-        {
-            if(functionResult >= y-0.5 and functionResult <= y+0.5)
-            {
-                checker++;
-                if(checker==1)
-                {
-                    path.moveTo(x+shiftX,-y+shiftY);
-                }
-                else
-                {
-                    path.lineTo(x+shiftX,-y+shiftY);
-                }
-            }
-        }
-    }
-    checker = 0;
-    drawer->drawPath(path);
-
-    pen.setColor(QColor(242, 234, 216));//Border line
-    pen.setWidth(8);
-    drawer->setPen(pen);
-    borderMain.addRoundedRect(QRectF(QPointF(shiftX_static-150,shiftY_static-150),QSizeF(300,300)),25,25);
-    drawer->drawPath(borderMain);
-}
-
 void MainWindow::textChanged1(const QString &text)
 {
     changePar[0]->setText(text);
+    functionPanel->setChangePar(changePar[0]->text().toFloat(),0);
     this->update();
 }
 
 void MainWindow::textChanged2(const QString &text)
 {
     changePar[1]->setText(text);
+    functionPanel->setChangePar(changePar[1]->text().toFloat(),1);
     this->update();
 }
 
 void MainWindow::textChanged3(const QString &text)
 {
     changePar[2]->setText(text);
+    functionPanel->setChangePar(changePar[2]->text().toFloat(),2);
     this->update();
 }
 
 void MainWindow::textChanged4(const QString &text)
 {
     changePar[3]->setText(text);
+    functionPanel->setChangePar(changePar[3]->text().toFloat(),3);
     this->update();
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *eventPress)
 {
-    if(eventPress->pos().x() >= shiftX_static-150 and eventPress->pos().x() < shiftX_static+150 and
-            eventPress->pos().y() > shiftY_static-150 and eventPress->pos().y() < shiftY_static+150)
+    if(eventPress->pos().x() > functionPanel->geometry().x() and
+            eventPress->pos().x() < functionPanel->geometry().x()+functionPanel->geometry().width() and
+            eventPress->pos().y() > functionPanel->geometry().y() and
+            eventPress->pos().y() < functionPanel->geometry().y()+functionPanel->geometry().height())
     {
-        pressOnRect = true;
-        controllX = shiftX-eventPress->pos().x();
-        controllY = shiftY-eventPress->pos().y();
+        functionPanel->setHitChecker(true);
+        functionPanel->setMousePress(eventPress->pos()-graphPos);
     }
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *eventMove)
 {
-    int checkScrollSideX =shiftX;
-    int checkScrollSideY =shiftY;
-    if(eventMove->pos().x() >= shiftX_static-150 and eventMove->pos().x() < shiftX_static+150 and
-            eventMove->pos().y() > shiftY_static-150 and eventMove->pos().y() < shiftY_static+150 and pressOnRect)
-   {
-        shiftX=eventMove->pos().x()+controllX;
-        shiftY=eventMove->pos().y()+controllY;
-        markerX->setGeometry(shiftX_static+130,shiftY-18,20,20);
-        markerY->setGeometry(shiftX+10,shiftY_static-150,20,20);
-        this->update();
-    }
-
-    if(shiftY>=50 and shiftY <= 338)
+    if(eventMove->pos().x() > functionPanel->geometry().x() and
+            eventMove->pos().x() < functionPanel->geometry().x()+functionPanel->geometry().width() and
+            eventMove->pos().y() > functionPanel->geometry().y() and
+            eventMove->pos().y() < functionPanel->geometry().y()+functionPanel->geometry().height() and functionPanel->getHitChecker())
     {
-        markerX->setVisible(true);
-        markerX->setGeometry(shiftX_static+130,shiftY-18,20,20);
-    }
-    else
-    {
-        markerX->setVisible(false);
-    }
-
-    if(shiftX>=250 and shiftX<=530)
-    {
-        markerY->setVisible(true);
-        markerY->setGeometry(shiftX+10,shiftY_static-150,20,20);
-    }
-    else
-    {
-        markerY->setVisible(false);
-    }
-
-    for(int c=0;c<11;c++)
-    {
-        degreesX[c]->setGeometry(shiftX-135+(25*c)+25*scrollShifterX,shiftY-10,50,50);
-        degreesY[c]->setGeometry(shiftX+10,shiftY-140+(c*25)+25*scrollShifterY,50,50);
-
-        if(degreesX[c]->geometry().x()<250 and shiftX<checkScrollSideX)
-        {
-            ++scrollShifterX;
-        }
-        else if(degreesX[c]->geometry().x()>540 and shiftX>checkScrollSideX)
-        {
-            --scrollShifterX;
-        }
-        degreesX[c]->setText(QString::number((c*10-50)/scale+10/scale*scrollShifterX));
-
-        if(degreesY[c]->geometry().y()>310 and shiftY>checkScrollSideY)
-        {
-            --scrollShifterY;
-        }
-        else if(degreesY[c]->geometry().y()<38 and shiftY<checkScrollSideY)
-        {
-            ++scrollShifterY;
-        }
-        degreesY[c]->setText(QString::number((-c*10+50)/scale-10/scale*scrollShifterY));
-
-        if(shiftY<38 or shiftY>310){degreesX[c]->setVisible(false);}
-        else{degreesX[c]->setVisible(true);}
-
-        if(shiftX<250 or shiftX>530){degreesY[c]->setVisible(false);}
-        else{degreesY[c]->setVisible(true);}
+        functionPanel->setMousePoint(eventMove->pos()-graphPos);
     }
 }
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *releaseEvent)
 {
-    pressOnRect = false;
+    functionPanel->setHitChecker(true);
 }

@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "functiongraph.h"
 
 #include <QApplication>
 
