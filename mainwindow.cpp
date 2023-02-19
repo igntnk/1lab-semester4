@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->setMinimumSize(800,600);
     this->setWindowTitle("FunctionGraphic");
 
-    graphPos = QPoint(250,40);
+    graphPos = QPoint(100,40);
     functionPanel = new FunctionGraph(this);
     functionPanel->setGeometry(QRect(graphPos,QSize(402,402)));
     QGraphicsDropShadowEffect* rectangleShadow = new QGraphicsDropShadowEffect();

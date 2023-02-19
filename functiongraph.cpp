@@ -12,12 +12,14 @@ FunctionGraph::FunctionGraph(QWidget* parent):
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////Numeric degrees setting
     for(int c=0;c<11;c++)
     {
+        int deaderX = ((c-5)*size/11)/scale+size/11*scrollShifterX;
+        int deaderY = ((c-5)*size/11)/scale+size/11*scrollShifterY;
         degreesX.push_back(new QLabel(this));
         degreesX[c]->setFont(QFont("Arial",size/57));
-        degreesX[c]->setText(QString::number(((c-5)*size/11)/scale));
+        degreesX[c]->setText(QString::number(deaderX));
         degreesY.push_back(new QLabel(this));
         degreesY[c]->setFont(QFont("Arial",size/57));
-        degreesY[c]->setText(QString::number(((c-5)*size/11)/scale));
+        degreesY[c]->setText(QString::number(deaderY));
         degreesX[c]->setGeometry(c*size/11+10,centerY-36,50,50);
         degreesY[c]->setGeometry(centerX+10,c*size/11,50,50);
     }
@@ -96,9 +98,9 @@ void FunctionGraph::doPainting(QPainter *drawer)
     int checker = 0;
     for(int x=-centerX-size;x<-centerX/2+size;x++)
     {
-        double functionResult = changePar[0]*pow(x,3)+changePar[1]*pow(x,2)+changePar[2]*x+changePar[3];
+        double functionResult = (changePar[0]*pow(x,3)+changePar[1]*pow(x,2)+changePar[2]*x+changePar[3])/scale;
 
-        for(int y=centerY-size;y<=size+centerY;y++)
+        for(int y=centerY-size*2;y<=size+centerY;y++)
         {
             if(functionResult >= y-1 and functionResult <= y+1)
             {
@@ -145,6 +147,7 @@ void FunctionGraph::mouseMoveEvent()
     if(centerX>=0 and centerY<=size){markerY->setVisible(true);}
     else{markerY->setVisible(false);}
 
+
     for(int c=0;c<11;c++)
     {
         degreesX[c]->setGeometry((c+scrollShifterX)*size/11+10+centerX-size/2,centerY-36,50,50);
@@ -158,7 +161,9 @@ void FunctionGraph::mouseMoveEvent()
         {
             --scrollShifterX;
         }
-        degreesX[c]->setText(QString::number(((c-5)*size/11)/scale+size/11*scrollShifterX));
+        int deaderX = (((c-5)*size/11)+size/11*scrollShifterX)/scale;
+        int deaderY = (((c-5)*size/11)+size/11*scrollShifterY)/scale;
+        degreesX[c]->setText(QString::number(deaderX));
 
         if(degreesY[c]->geometry().y()>size and centerY>checkScrollSideY)
         {
@@ -168,7 +173,7 @@ void FunctionGraph::mouseMoveEvent()
         {
             ++scrollShifterY;
         }
-        degreesY[c]->setText(QString::number(((c-5)*size/11)/scale+size/11*scrollShifterY));
+        degreesY[c]->setText(QString::number(deaderY));
 
         if(centerY<0 or centerY>size){degreesX[c]->setVisible(false);}
         else{degreesX[c]->setVisible(true);}
